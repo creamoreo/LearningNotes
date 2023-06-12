@@ -1,2 +1,2 @@
 # LearningNotes
-# This is my notes for learning program, also will share them later.
+This is my notes for learning program, also will share them later.
