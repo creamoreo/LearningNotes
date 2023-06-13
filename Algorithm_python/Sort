@@ -1,0 +1,26 @@
+# quick_sort
+```python
+class Sort:
+    def __init__(self, length):
+        self.length = length
+        self.arr = [randint(1, 100) for x in range(length)]
+
+    def partition(self, left, right):
+        k = left
+        i = left
+        random_position = randint(left, right)
+        self.arr[random_position], self.arr[right] = self.arr[right], self.arr[random_position]
+        while i < right:
+            if self.arr[i] < self.arr[right]:
+                self.arr[i], self.arr[k] = self.arr[k], self.arr[i]
+                k += 1
+            i += 1
+        self.arr[k], self.arr[right] = self.arr[right], self.arr[k]
+        return k
+
+    def quick_sort(self, left, right):
+        if left < right:
+            pivot = self.partition(left, right)
+            self.quick_sort(left, pivot - 1)
+            self.quick_sort(pivot + 1, right)
+```
