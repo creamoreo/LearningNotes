@@ -1,0 +1,138 @@
+RED = 0  # 红色
+BLACK = 1  # 黑色
+
+
+def right_rotate(tree, node):
+    if not node.left:
+        return False
+    node_left = node.left
+    node_left.p = node.p
+    if not node.p:
+        tree.root = node_left
+    elif node == node.p.left:
+        node.p.left = node_left
+    elif node == node.p.right:
+        node.p.right = node_left
+    if node_left.right:
+        node_left.right.p = node
+    node.left = node_left.right
+    node.p = node_left
+    node_left.right = node
+
+
+class RBNode:
+    def __init__(self, value, color):
+        self.value = value
+        self.color = color
+        self.p = None
+        self.left = None
+        self.right = None
+
+
+class RedBlackTree:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, value):
+        node = RBNode(value, RED)
+        if self.root is None:  # 如果根节点为空,则直接插入
+            self.root = node  # 新结点为根结点
+            node.color = BLACK
+            return
+        else:
+            cur = self.root
+            while cur:
+                pre = cur  # pre记录cur的父节点
+                if value < cur.value:
+                    cur = cur.left  # 如果插入值小于当前结点的值,则往左子树走
+                else:
+                    cur = cur.right  # 如果插入值大于当前结点的值,则往右子树走
+            if pre.value > value:
+                pre.left = node  # 如果插入值小于父节点的值,则插入到左子树
+            else:
+                pre.right = node  # 如果插入值大于父节点的值,则插入到右子树
+            node.p = pre  # 设置新结点的父节点
+            self.insert_fixup(node)  # 插入后修复红黑树
+
+    def left_rotate(self, x):
+        if x.right is None:
+            return
+        y: RBNode = x.right
+        if y.left:  # 如果y的左子树不为空,则将y的左子树变为x的右子树
+            y.left.p = x  # 将y的左子树的父节点设置为x
+            x.right = y.left  # 将y的左子树变为x的右子树
+        else:
+            x.right = None
+        y.p = x.p  # 将y的父节点设置为x的父节点
+        if x.p is None:  # 如果x的父节点为空,则将y设置为根节点
+            self.root = y
+        else:
+            if x == x.p.left:  # 如果x是x的父节点的左子树,则将y设置为x的父节点的左子树
+                x.p.left = y  # 将y设置为x的父节点的左子树
+            else:
+                x.p.right = y  # 将y设置为x的父节点的右子树
+        y.left = x  # 将x设置为y的左子树
+        x.p = y  # 将x的父节点设置为y
+
+    def insert_fixup(self, node):
+        parent: RBNode = node.p
+        while parent and parent.color == RED:
+            # 如果父节点是祖父节点的左子树
+            if parent == parent.p.left:
+                # 情形三
+                uncle: RBNode = parent.p.right
+                if uncle and uncle.color == RED:  # 如果叔叔节点存在且为红色
+                    parent.color = BLACK  # 将父节点设置为黑色
+                    uncle.color = BLACK  # 将叔叔节点设置为黑色
+                    parent.p.color = RED  # 将祖父节点设置为红色
+                    node = parent.p  # 将祖父节点设置为当前节点
+                    parent = node.p  # 将祖父节点的父节点设置为父节点
+                    continue
+                # 情形四
+                if node == parent.right:
+                    self.left_rotate(parent)
+                    node, parent = parent, node
+                # 情形五
+                parent.color = BLACK  # 将父节点设置为黑色
+                parent.p.color = RED  # 将祖父节点设置为红色
+                right_rotate(self, parent.p)  # 将祖父节点右旋
+            else:
+                # 情形三
+                uncle: RBNode = parent.p.left
+                if uncle and uncle.color == RED:  # 如果叔叔节点存在且为红色
+                    parent.color = BLACK  # 将父节点设置为黑色
+                    uncle.color = BLACK  # 将叔叔节点设置为黑色
+                    parent.p.color = RED  # 将祖父节点设置为红色
+                    node = parent.p  # 将祖父节点设置为当前节点
+                    parent = node.p  # 将祖父节点的父节点设置为父节点
+                    continue
+                # 情形四
+                if node == parent.left:
+                    right_rotate(self, parent)  # 将父节点右旋
+                    node, parent = parent, node  # 将父节点设置为当前节点
+                # 情形五
+                parent.color = BLACK  # 将父节点设置为黑色
+                parent.p.color = RED  # 将祖父节点设置为红色
+                self.left_rotate(parent.p)  # 将祖父节点左旋
+
+        self.root.color = BLACK
+
+
+def rbtree_print(node, key, direction):
+    if node:
+        if direction == 0:  # tree是根节点
+            print("%2d(B) is root" % node.value)
+        else:  # tree是分支节点
+            print("%2d(%s) is %2d's %6s child" % (
+                node.value, ("B" if node.color == 1 else "R"), key, ("right" if direction == 1 else "left")))
+
+        rbtree_print(node.left, node.value, -1)
+        rbtree_print(node.right, node.value, 1)
+
+
+if __name__ == '__main__':
+    number_list = (7, 4, 1, 8, 5, 2, 9, 6, 3)
+    tree = RedBlackTree()
+    for i in number_list:
+        tree.insert(i)
+    rbtree_print(tree.root, tree.root.value, 0)
